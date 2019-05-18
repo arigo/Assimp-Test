@@ -1,0 +1,17 @@
+/Assets/SteamVR
+/Assets/Oculus
+/Assets/Temporary.unity*
+.*.sw?
+/.vs
+/Library
+/Temp
+/*.csproj
+/*.sln
+*~
+Thumbs.db
+
+\.vscode/
+/obj/Temp/Debug
+obj/Debug/
+
+VideoCaptureLib_Log\.txt
