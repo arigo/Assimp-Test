@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using Assimp.Unmanaged;
 
@@ -16,8 +17,7 @@ public class AssImpTest : MonoBehaviour
 
     private void Start()
     {
-        //ImportFile("D:\\Projects\\vr-sketch-4\\Assets\\Edit\\Models\\Axes.dae", Display);
-        string filename = "D:\\Temp\\Cliff house dynamic v2.dae";
+        string filename = "D:\\Temp\\Untitled 2.dae";
         ImportFile(filename, (ptr) => Display(filename, ptr));
     }
 
@@ -50,7 +50,8 @@ public class AssImpTest : MonoBehaviour
             var mesh1 = new Mesh();
             mesh1.name = mesh.Name.GetString();
 
-            mesh1.vertices = ReadArrayVector3(mesh.Vertices, mesh.NumVertices);
+            var vertices = ReadArrayVector3(mesh.Vertices, mesh.NumVertices);
+            mesh1.vertices = vertices;
 
             if (mesh.TextureCoords.Length > 0)
             {
@@ -69,6 +70,12 @@ public class AssImpTest : MonoBehaviour
                     tris.Add(triangle[0]);
                     tris.Add(triangle[2]);
                     tris.Add(triangle[1]);
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                    string s = string.Join(", ", triangle.Select(i => vertices[i]));
+                    Debug.Log("polygon with " + triangle.Length + " vertices: " + s);
                 }
             }
             mesh1.SetTriangles(tris, 0);
