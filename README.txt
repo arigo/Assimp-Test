@@ -10,5 +10,7 @@ https://github.com/assimp/assimp
 Based on assimp-net, which is partly copied into Assets/AssimpNet/
 with no changes, but with the outer layer removed.
 
-This is based on the older Assimp 3.3.1 because assimp-net was not
-updated, but the plan is to eventually update this code to Assimp 4.1 or 5.
+The DLL in Assets/StreamingAssets/ comes from Appimp 4.1.0.  The C# sources
+are older; I had to fix one detail and I hope there isn't any hidden ones.
+The plan is to eventually update this code to Assimp 5, which is in available
+as source-only release candidate as of May 2019.
