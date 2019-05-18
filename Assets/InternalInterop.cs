@@ -37,9 +37,7 @@ namespace Assimp
 
         public static unsafe void MemCopyInline(void* pDest, void* pSrc, int count)
         {
-            byte[] tmp = new byte[count];
-            Marshal.Copy((IntPtr)pSrc, tmp, 0, count);
-            Marshal.Copy(tmp, 0, (IntPtr)pDest, count);
+            Buffer.MemoryCopy(pSrc, pDest, count, count);
         }
 
         public static unsafe void MemSetInline(void* pDest, byte value, int count)

@@ -300,8 +300,10 @@ namespace Assimp.Unmanaged
     //[CLSCompliant(false)]
     public unsafe struct AiTexture
     {
+#if false
         //Internal use only
         private static readonly char[] s_nullFormat = new char[] { '\0', '\0', '\0', '\0' };
+#endif
 
         /// <summary>
         /// Width of the texture.
@@ -314,16 +316,18 @@ namespace Assimp.Unmanaged
         public uint Height;
 
         /// <summary>
-        /// sbyte[4], format extension hint. Fixed size char is two bytes regardless of encoding. Unmanaged assimp uses a char that
-        /// maps to one byte.
+        /// sbyte[HINTMAXTEXTURELEN], format extension hint. Fixed size char is two bytes regardless of encoding. Unmanaged assimp uses a char that
+        /// maps to one byte.  HINTMAXTEXTURELEN is 9 in recent versions of Assimp.
         /// </summary>
-        public fixed sbyte FormatHint[4];
+        public fixed sbyte FormatHint[HINTMAXTEXTURELEN];
+        public const int HINTMAXTEXTURELEN = 9;
 
         /// <summary>
         /// aiTexel*, array of texel data.
         /// </summary>
         public IntPtr Data;
 
+#if false
         /// <summary>
         /// Sets the format hint.
         /// </summary>
@@ -342,6 +346,7 @@ namespace Assimp.Unmanaged
                 charPtr[3] = (sbyte) '\0';
             }
         }
+#endif
 
         /// <summary>
         /// Gets the format hint.

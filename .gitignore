@@ -9,6 +9,8 @@
 /*.sln
 *~
 Thumbs.db
+/*.VC.db
+/*.VC.VC.opendb
 
 \.vscode/
 /obj/Temp/Debug

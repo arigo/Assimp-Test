@@ -17,8 +17,10 @@ public class AssImpTest : MonoBehaviour
 
     private void Start()
     {
-        string filename = "D:\\Temp\\Cliff house dynamic v2.dae";
+        //string filename = "D:\\Temp\\Cliff house dynamic v2.dae";
         //string filename = "D:\\Temp\\Untitled 2.dae";
+        //string filename = "D:\\Temp\\Untitled.fbx";
+        string filename = "D:\\Temp\\ogre.mdl";
         ImportFile(filename, (ptr) => Display(filename, ptr));
     }
 
@@ -27,7 +29,9 @@ public class AssImpTest : MonoBehaviour
         AiScene scene = Assimp.MemoryHelper.Read<AiScene>(ptr);
         Debug.Log(scene.NumMeshes + " meshes");
         Debug.Log(scene.NumMaterials + " materials");
+        Debug.Log(scene.NumTextures + " internal textures");
 
+        var texloader = new TextureLoader { scene = scene, basefilename = filename };
         materials = new Material[scene.NumMaterials];
         int materials_i = 0;
         foreach (var mat in Assimp.MemoryHelper.FromNativeArray<Assimp.Material, AiMaterial>(scene.Materials, (int)scene.NumMaterials, true))
@@ -36,7 +40,11 @@ public class AssImpTest : MonoBehaviour
             mat1.color = ToColor(mat.ColorDiffuse);
 
             if (mat.HasTextureDiffuse)
-                LoadTexture(mat, mat1, filename);
+            {
+                var tex = texloader.Load(mat);
+                if (tex != null)
+                    mat1.mainTexture = tex;
+            }
 
             materials[materials_i++] = mat1;
         }
@@ -93,30 +101,75 @@ public class AssImpTest : MonoBehaviour
         Recurse(transform, root);
     }
 
-    void LoadTexture(Assimp.Material mat, Material mat1, string filename)
+    class TextureLoader
     {
-        var tex = mat.TextureDiffuse;
-        if (string.IsNullOrEmpty(tex.FilePath))
-            return;
-        if (Path.IsPathRooted(tex.FilePath))
+        internal AiScene scene;
+        internal string basefilename;
+
+        Dictionary<string, Texture2D> textures;
+        AiTexture[] scene_textures;
+
+        internal Texture2D Load(Assimp.Material mat)
         {
-            Debug.LogError("Skipping loading texture from: " + tex.FilePath);
-            return;
+            var tex = mat.TextureDiffuse;
+            if (string.IsNullOrEmpty(tex.FilePath))
+                return null;
+            if (Path.IsPathRooted(tex.FilePath))
+            {
+                Debug.LogError("Skipping loading texture from: " + tex.FilePath);
+                return null;
+            }
+
+            Texture2D tex1;
+            if (textures == null)
+                textures = new Dictionary<string, Texture2D>();
+            if (textures.TryGetValue(tex.FilePath, out tex1))
+                return tex1;
+
+            try
+            {
+                int tex_index;
+                if (tex.FilePath.StartsWith("*") && tex.FilePath.Length > 1 && int.TryParse(tex.FilePath.Substring(1), out tex_index))
+                    tex1 = BuildTextureFromInternal(tex_index);
+                else
+                    tex1 = BuildTextureFromExternal(tex.FilePath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                tex1 = null;
+            }
+            textures[tex.FilePath] = tex1;
+            return tex1;
         }
 
-        filename = Path.Combine(Path.GetDirectoryName(filename), tex.FilePath);
-
-        var tex1 = new Texture2D(1, 1);
-        try
+        Texture2D BuildTextureFromExternal(string filename)
         {
+            filename = Path.Combine(Path.GetDirectoryName(basefilename), filename);
             byte[] all_bytes = File.ReadAllBytes(filename);
+            var tex1 = new Texture2D(1, 1);
             tex1.LoadImage(all_bytes, markNonReadable: true);
-            mat1.SetTexture("_MainTex", tex1);
+            return tex1;
         }
-        catch
+
+        Texture2D BuildTextureFromInternal(int tex_index)
         {
-            Debug.LogError("Texture cannot be loaded: " + tex.FilePath);
-            tex1 = null;
+            if (scene_textures == null)
+                scene_textures = ReadArrayOfPtr<AiTexture>(scene.Textures, scene.NumTextures);
+            var tex = scene_textures[tex_index];
+            if (tex.Height != 0)
+            {
+                var tex1 = new Texture2D((int)tex.Width, (int)tex.Height, TextureFormat.RGBA32, true);
+                tex1.SetPixels32(ReadArrayColor32BottomUp(tex.Data, (int)tex.Width, (int)tex.Height));
+                tex1.Apply(true, true);
+                return tex1;
+            }
+            else
+            {
+                var tex1 = new Texture2D(1, 1);
+                tex1.LoadImage(ReadArrayBytes(tex.Data, tex.Width), markNonReadable: true);
+                return tex1;
+            }
         }
     }
 
@@ -187,8 +240,34 @@ public class AssImpTest : MonoBehaviour
     public static int[] ReadArrayInt(IntPtr array_inline, uint count)
     {
         int[] result = new int[count];
-        for (int i = 0; i < count; i++)
-            result[i] = System.Runtime.InteropServices.Marshal.ReadInt32(array_inline, 4 * i);
+        System.Runtime.InteropServices.Marshal.Copy(array_inline, result, 0, (int)count);
+        return result;
+    }
+
+    public static byte[] ReadArrayBytes(IntPtr array_inline, uint nbytes)
+    {
+        byte[] result = new byte[nbytes];
+        System.Runtime.InteropServices.Marshal.Copy(array_inline, result, 0, (int)nbytes);
+        return result;
+    }
+
+    public static Color32[] ReadArrayColor32BottomUp(IntPtr array_inline, int width, int height)
+    {
+        Color32[] result = new Color32[width * height];
+        for (int j = 0; j < height; j++)
+        {
+            int lineofs1 = (height - 1 - j) * width;
+            int lineofs2 = j * width;
+            for (int i = 0; i < width; i++)
+            {
+                uint value = (uint)System.Runtime.InteropServices.Marshal.ReadInt32(array_inline, 4 * (lineofs1 + i));
+                result[lineofs2 + i] = new Color32(
+                    (byte)(value >> 16),
+                    (byte)(value >> 8),
+                    (byte)(value >> 0),
+                    (byte)(value >> 24));
+            }
+        }
         return result;
     }
 
