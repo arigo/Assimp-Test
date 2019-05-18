@@ -192,6 +192,8 @@ public class AssImpTest : MonoBehaviour
 
     public static T[] ReadArrayOfPtr<T>(IntPtr array_of_pointers, uint count) where T : struct
     {
+        if (count == 0)
+            return Array.Empty<T>();
         T[] result = new T[count];
         for (int i = 0; i < count; i++)
         {
@@ -203,6 +205,8 @@ public class AssImpTest : MonoBehaviour
 
     public static T[] ReadArrayInline<T>(IntPtr array_inline, uint count) where T : struct
     {
+        if (count == 0)
+            return Array.Empty<T>();
         T[] result = new T[count];
         int size = Assimp.InternalInterop.SizeOfInline<T>();
         for (int i = 0; i < count; i++)
@@ -241,6 +245,8 @@ public class AssImpTest : MonoBehaviour
 
     public static int[] ReadArrayInt(IntPtr array_inline, uint count)
     {
+        if (count == 0)
+            return Array.Empty<int>();
         int[] result = new int[count];
         System.Runtime.InteropServices.Marshal.Copy(array_inline, result, 0, (int)count);
         return result;
@@ -248,6 +254,8 @@ public class AssImpTest : MonoBehaviour
 
     public static byte[] ReadArrayBytes(IntPtr array_inline, uint nbytes)
     {
+        if (nbytes == 0)
+            return Array.Empty<byte>();
         byte[] result = new byte[nbytes];
         System.Runtime.InteropServices.Marshal.Copy(array_inline, result, 0, (int)nbytes);
         return result;
