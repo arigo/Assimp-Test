@@ -17,7 +17,8 @@ public class AssImpTest : MonoBehaviour
 
     private void Start()
     {
-        string filename = "D:\\Temp\\Untitled 2.dae";
+        string filename = "D:\\Temp\\Cliff house dynamic v2.dae";
+        //string filename = "D:\\Temp\\Untitled 2.dae";
         ImportFile(filename, (ptr) => Display(filename, ptr));
     }
 
@@ -67,13 +68,15 @@ public class AssImpTest : MonoBehaviour
                 var triangle = ReadArrayInt(face.Indices, face.NumIndices);
                 if (triangle.Length == 3)
                 {
+                    /* XXX for Unity to display meshes properly if they are used in a node with
+                     * a negative-determinant transformation, we'd need to swap the orientation
+                     * here. */
                     tris.Add(triangle[0]);
                     tris.Add(triangle[2]);
                     tris.Add(triangle[1]);
                 }
                 else
                 {
-                    throw new NotImplementedException();
                     string s = string.Join(", ", triangle.Select(i => vertices[i]));
                     Debug.Log("polygon with " + triangle.Length + " vertices: " + s);
                 }
