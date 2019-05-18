@@ -17,6 +17,8 @@ public class AssImpTest : MonoBehaviour
 
     private void Start()
     {
+        AssimpLibrary.Instance.LoadLibrary(Application.dataPath + "\\StreamingAssets\\Assimp64-4.1.0.dll");
+
         //string filename = "D:\\Temp\\Cliff house dynamic v2.dae";
         //string filename = "D:\\Temp\\Untitled 2.dae";
         //string filename = "D:\\Temp\\Untitled.fbx";
