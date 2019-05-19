@@ -174,7 +174,7 @@ void emit_scene(std::ostream &out, const aiScene *scene)
 
     emit_node(out, scene->mRootNode);
     
-    out << "\n\nComplete!\n";
+    out << "\n:-)";
 }
 
 int main(int argc, char **argv)
