@@ -10,10 +10,13 @@
 *~
 Thumbs.db
 /*.VC.db
-/*.VC.VC.opendb
+*.VC.VC.opendb
 
 \.vscode/
 /obj/Temp/Debug
 obj/Debug/
 
 VideoCaptureLib_Log\.txt
+
+vrskio/VrskIO/.vs
+vrskio/VrskIO/x64/Debug
