@@ -36,6 +36,7 @@ struct dump_mesh
     uint_t numVertices;
     uint_t numFaceVertices;
     uint_t materialIndex;
+    uint_t numTextureCoords;   /* 0 or 1 */
 };
 
 struct dump_node
@@ -149,9 +150,12 @@ void emit_scene(std::ostream &out, const aiScene *scene)
         for (uint_t j = 0; j < mesh->mNumFaces; j++)
             mesh1.numFaceVertices += 1 + mesh->mFaces[j].mNumIndices;
         mesh1.materialIndex = mesh->mMaterialIndex;
+        mesh1.numTextureCoords = (mesh->mTextureCoords[0] != NULL);
         out.write((const char *)&mesh1, sizeof(mesh1));
 
         out.write((const char *)mesh->mVertices, sizeof(aiVector3D) * mesh->mNumVertices);
+        if (mesh1.numTextureCoords)
+            out.write((const char *)mesh->mTextureCoords[0], sizeof(aiVector3D) * mesh->mNumVertices);
 
         size_t tmpsize = sizeof(unsigned int) * mesh1.numFaceVertices;
         unsigned int *tmp = (unsigned int *)malloc(tmpsize);
